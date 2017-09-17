@@ -8,13 +8,18 @@ import (
 )
 
 type Client struct {
-	host string
+	host   string
+	client *http.Client
 }
 
-func NewClient(port uint32) *Client {
+func NewClient(port uint32, maxIdleConnsPerHost int) *Client {
+	transport := &http.Transport{
+		MaxIdleConnsPerHost: maxIdleConnsPerHost,
+	}
 	return &Client{
 		host: fmt.Sprintf("localhost:%d",
 			port),
+		client: &http.Client{Transport: transport},
 	}
 }
 
@@ -33,19 +38,18 @@ func (c *Client) FizzBuzz(int1, int2, limit int, string1, string2 string) (
 	values.Add("string1", string1)
 	values.Add("string2", string2)
 	url.RawQuery = values.Encode()
-	return result, httpGet(url.String(), &result)
+	return result, c.httpGet(url.String(), &result)
 }
 
 // httpGet sends a http GET request and decodes the JSON response in
 // provided output.
-func httpGet(url string, output interface{}) error {
+func (c *Client) httpGet(url string, output interface{}) error {
 	request, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return err
 	}
 	request.Header.Add("Accept", "application/json")
-	client := http.Client{}
-	response, err := client.Do(request)
+	response, err := c.client.Do(request)
 	if err != nil {
 		return err
 	}

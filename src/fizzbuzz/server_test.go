@@ -61,7 +61,7 @@ func startServer(router string) (*ServerProcess, *client.Client, error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	return server, client.NewClient(server.Port), nil
+	return server, client.NewClient(server.Port, http.DefaultMaxIdleConnsPerHost), nil
 }
 
 func checkError(c *C, client *client.Client, int1, int2, limit int, string1,
