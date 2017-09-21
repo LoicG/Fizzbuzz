@@ -15,7 +15,7 @@ import (
 func main() {
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, strings.TrimSpace(`
-client sends http requests to the fizz-buzz server
+client sends http requests to the fizz-buzz server [OPTIONS]
 `)+"\n")
 		flag.PrintDefaults()
 	}
@@ -59,6 +59,6 @@ client sends http requests to the fizz-buzz server
 	log.Printf("%d Requests in: %v\n", count, end)
 	seconds := int64(end.Seconds())
 	if seconds != 0 {
-		log.Printf("%d Requests per Second", seconds)
+		log.Printf("%d Requests per Second", count/seconds)
 	}
 }

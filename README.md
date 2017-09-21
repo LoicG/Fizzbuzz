@@ -1,6 +1,6 @@
 # FizzBuzz Server
 
-```
+```sh
 ./fizzbuzz.exe -h
 
 Simple fizz-buzz REST server [OPTIONS]
@@ -16,10 +16,10 @@ routers & frameworks:
 
 # FizzBuzz Stress Client
 
-```
+```sh
 ./fizzbuzzclient.exe -h
 
-client sends http requests to the fizz-buzz server
+client sends http requests to the fizz-buzz server [OPTIONS]
   -error
         if true sends invalid request
   -jobs int
