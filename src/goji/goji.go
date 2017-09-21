@@ -4,23 +4,28 @@ import (
 	"flag"
 	"fmt"
 	"net/http"
+	"strconv"
 	"utils"
 
-	"github.com/zenazn/goji"
-	"github.com/zenazn/goji/web"
+	goji "github.com/zenazn/goji/web"
 )
 
 type Server struct {
+	ws   *goji.Mux
+	port int
 }
 
 func NewServer(port int) *Server {
-	server := &Server{}
+	server := &Server{
+		ws:   goji.New(),
+		port: port,
+	}
 	flag.Set("bind", ":"+fmt.Sprintf("%v", port))
 	return server
 }
 
-func wrap(handler utils.Handler) func(web.C, http.ResponseWriter, *http.Request) {
-	return func(c web.C, response http.ResponseWriter, request *http.Request) {
+func wrap(handler utils.Handler) func(goji.C, http.ResponseWriter, *http.Request) {
+	return func(c goji.C, response http.ResponseWriter, request *http.Request) {
 		result, err := handler(request)
 		if err != nil {
 			http.Error(response, err.Error(), http.StatusBadRequest)
@@ -31,10 +36,9 @@ func wrap(handler utils.Handler) func(web.C, http.ResponseWriter, *http.Request)
 }
 
 func (s *Server) AttachRoute(route string, handler utils.Handler) {
-	goji.Get(route, wrap(handler))
+	s.ws.Get(route, wrap(handler))
 }
 
 func (s *Server) Run() error {
-	goji.Serve()
-	return nil
+	return http.ListenAndServe(":"+strconv.Itoa(s.port), s.ws)
 }
