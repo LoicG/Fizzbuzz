@@ -15,7 +15,7 @@ import (
 func main() {
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, strings.TrimSpace(`
-fizzbuzzclient sends http fizzbuzz requests.
+client sends http requests to the fizz-buzz server
 `)+"\n")
 		flag.PrintDefaults()
 	}
@@ -23,13 +23,20 @@ fizzbuzzclient sends http fizzbuzz requests.
 	number := flag.Int("number", 1, "number request per jobs")
 	port := flag.Uint("port", 8084, "server port")
 	limit := flag.Int("limit", 16, "fizzbuzz limit")
+	invalid := flag.Bool("error", false, "if true sends invalid request")
 	flag.Parse()
 
-	count := int32(0)
+	fizz := 3
+	buzz := 5
+	if *invalid {
+		fizz = -1
+	}
+
+	count := int64(0)
 	ticker := time.NewTicker(time.Second)
 	go func() {
 		for _ = range ticker.C {
-			log.Printf("%d requests succeeded\n", atomic.LoadInt32(&count))
+			log.Printf("%d requests\n", atomic.LoadInt64(&count))
 		}
 	}()
 
@@ -41,15 +48,17 @@ fizzbuzzclient sends http fizzbuzz requests.
 			defer wg.Done()
 			client := client.NewClient(uint32(*port), *jobs)
 			for j := 0; j != *number; j++ {
-				_, err := client.FizzBuzz(3, 5, *limit, "fizz", "buzz")
-				if err != nil {
-					log.Fatalf("error: %v", err)
-				}
-				atomic.AddInt32(&count, 1)
+				client.FizzBuzz(fizz, buzz, *limit, "fizz", "buzz")
+				atomic.AddInt64(&count, 1)
 			}
 		}()
 	}
 	wg.Wait()
 	ticker.Stop()
-	log.Printf("%d requests in: %v\n", count, time.Since(start))
+	end := time.Since(start)
+	log.Printf("%d Requests in: %v\n", count, end)
+	seconds := int64(end.Seconds())
+	if seconds != 0 {
+		log.Printf("%d Requests per Second", seconds)
+	}
 }
