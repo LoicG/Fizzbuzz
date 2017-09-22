@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strconv"
 )
 
@@ -16,16 +17,16 @@ func WriteJson(w http.ResponseWriter, output interface{}) {
 	w.Write(bytes)
 }
 
-func RequireParameter(request *http.Request, param string) (string, error) {
-	value := request.URL.Query().Get(param)
+func RequireParameter(values url.Values, param string) (string, error) {
+	value := values.Get(param)
 	if value != "" {
 		return value, nil
 	}
 	return "", fmt.Errorf("missing %s parameter in request", param)
 }
 
-func RequireIntParameter(request *http.Request, param string) (int, error) {
-	value, err := RequireParameter(request, param)
+func RequireIntParameter(values url.Values, param string) (int, error) {
+	value, err := RequireParameter(values, param)
 	if err != nil {
 		return 0, err
 	}

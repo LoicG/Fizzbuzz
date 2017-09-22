@@ -30,23 +30,24 @@ func getFizzBuzzList(int1, int2, limit int, string1, string2 string) []string {
 }
 
 func FizzBuzz(request *http.Request) (interface{}, error) {
-	int1, err := utils.RequireIntParameter(request, "int1")
+	params := request.URL.Query()
+	int1, err := utils.RequireIntParameter(params, "int1")
 	if err != nil {
 		return nil, err
 	}
-	int2, err := utils.RequireIntParameter(request, "int2")
+	int2, err := utils.RequireIntParameter(params, "int2")
 	if err != nil {
 		return nil, err
 	}
-	limit, err := utils.RequireIntParameter(request, "limit")
+	limit, err := utils.RequireIntParameter(params, "limit")
 	if err != nil {
 		return nil, err
 	}
-	string1, err := utils.RequireParameter(request, "string1")
+	string1, err := utils.RequireParameter(params, "string1")
 	if err != nil {
 		return nil, err
 	}
-	string2, err := utils.RequireParameter(request, "string2")
+	string2, err := utils.RequireParameter(params, "string2")
 	if err != nil {
 		return nil, err
 	}
