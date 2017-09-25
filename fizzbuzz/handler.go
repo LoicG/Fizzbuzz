@@ -22,7 +22,7 @@ func getFizzBuzzList(int1, int2, limit int, string1, string2 string) []string {
 		case i%int2 == 0:
 			result[i-1] = string2
 		default:
-			result[i-1] = strconv.Itoa(i)
+			result[i-1] = strconv.FormatInt(int64(i), 10)
 		}
 	}
 	return result
