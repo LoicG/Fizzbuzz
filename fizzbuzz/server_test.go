@@ -3,11 +3,13 @@ package main
 import (
 	"client"
 	"fmt"
+	"net"
 	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"testing"
+	"time"
 
 	. "gopkg.in/check.v1"
 )
@@ -20,6 +22,7 @@ var (
 	_ = Suite(&TestSuite{})
 	// Default test port
 	TestPort = uint32(8085)
+	Timeout  = 10 * time.Second
 )
 
 // Process wrapper
@@ -30,6 +33,7 @@ type ServerProcess struct {
 
 func (s *ServerProcess) Stop() {
 	s.cmd.Process.Kill()
+	s.Wait()
 }
 
 func (s *ServerProcess) Start() error {
@@ -38,6 +42,26 @@ func (s *ServerProcess) Start() error {
 
 func (s *ServerProcess) Wait() {
 	s.cmd.Process.Wait()
+}
+
+func makeTcpWaiter(host string) error {
+	const minLoopDelay = 500 * time.Millisecond
+	end := time.Now().Add(Timeout)
+	for {
+		start := time.Now()
+		conn, err := net.Dial("tcp", host)
+		if err == nil {
+			defer conn.Close()
+			return err
+		}
+		now := time.Now()
+		if now.Sub(start) < minLoopDelay {
+			time.Sleep(start.Add(minLoopDelay).Sub(now))
+		}
+		if time.Now().After(end) {
+			return fmt.Errorf("startup timed out after %v", Timeout)
+		}
+	}
 }
 
 // startServerProcess starts fizzbuzz.exe process from the $GOBIN directory
@@ -51,6 +75,19 @@ func startServerProcess(router string) (*ServerProcess, error) {
 	err := server.Start()
 	if err != nil {
 		return nil, err
+	}
+
+	waiter := make(chan error, 1)
+	go func() {
+		waiter <- makeTcpWaiter(fmt.Sprintf("localhost:%d", server.Port))
+	}()
+	select {
+	case err := <-waiter:
+		if err != nil {
+			server.Stop()
+			return server, err
+		}
+		break
 	}
 	return server, nil
 }
