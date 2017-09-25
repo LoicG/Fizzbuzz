@@ -28,7 +28,7 @@ func getFizzBuzzList(int1, int2, limit int, string1, string2 string) []string {
 	return result
 }
 
-func FizzBuzz(request *http.Request) (interface{}, error) {
+func FizzBuzz(request *http.Request) ([]string, error) {
 	params := request.URL.Query()
 	int1, err := utils.RequireIntParameter(params, "int1")
 	if err != nil {

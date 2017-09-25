@@ -1,20 +1,21 @@
 package utils
 
 import (
-	"encoding/json"
 	"fmt"
+	"github.com/pquerna/ffjson/ffjson"
 	"net/http"
 	"net/url"
 	"strconv"
 )
 
-func WriteJson(w http.ResponseWriter, output interface{}) {
-	bytes, err := json.Marshal(output)
+func WriteJson(w http.ResponseWriter, output []string) {
+	bytes, err := ffjson.Marshal(output)
 	if err != nil {
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(bytes)
+	ffjson.Pool(bytes)
 }
 
 func RequireParameter(values url.Values, param string) (string, error) {
