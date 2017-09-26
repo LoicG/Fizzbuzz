@@ -12,14 +12,19 @@ import (
 //  all multiples of 'int2' are replaced by 'string2',
 //  all multiples of 'int1' and 'int2' are replaced by 'string1string2'
 func getFizzBuzzList(int1, int2, limit int, string1, string2 string) []string {
+	if limit < 1 {
+		return []string{}
+	}
 	result := make([]string, limit)
 	for i := 1; i <= limit; i++ {
+		mod1 := i % int1
+		mod2 := i % int2
 		switch {
-		case i%(int1*int2) == 0:
+		case mod1 == 0 && mod2 == 0:
 			result[i-1] = string1 + string2
-		case i%int1 == 0:
+		case mod1 == 0:
 			result[i-1] = string1
-		case i%int2 == 0:
+		case mod2 == 0:
 			result[i-1] = string2
 		default:
 			result[i-1] = strconv.FormatInt(int64(i), 10)
